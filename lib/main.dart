@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:nezumi/common/global.dart';
 import 'package:nezumi/model/app.dart';
+import 'package:nezumi/page/common/center.dart';
 import 'package:nezumi/page/settings/settings_page.dart';
 import 'package:provider/provider.dart';
 
@@ -18,7 +19,17 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [ChangeNotifierProvider.value(value: AppModel())],
       child: Consumer<AppModel>(
-        builder: (context, appInfo, _) {
+        builder: (context, appModel, _) {
+          final themeColor = appModel[#themeColor];
+          final theme = ThemeData(
+              brightness: Brightness.light,
+              primaryColor: themeColor,
+              accentColor: themeColor,
+              canvasColor: Colors.grey[200],
+              hintColor: themeColor,
+              backgroundColor: Colors.transparent,
+              splashColor: themeColor.withAlpha(50),
+              primaryColorBrightness: Brightness.dark);
           return MaterialApp(
             title: 'nezumi',
             localizationsDelegates: [
@@ -28,11 +39,16 @@ class MyApp extends StatelessWidget {
             ],
             debugShowCheckedModeBanner: false,
             supportedLocales: S.delegate.supportedLocales,
-            theme: AppModel.themeData(Brightness.light),
-            darkTheme: AppModel.themeData(Brightness.dark),
-            themeMode: appInfo.darkMode,
-            locale: appInfo.locale,
-            home: SettingsPage(),
+            theme: theme,
+            darkTheme: theme.copyWith(
+              brightness: Brightness.dark,
+              canvasColor: Colors.grey[850],
+            ),
+            themeMode: appModel[#themeMode],
+            locale: appModel[#localeLanguage],
+            home: CenterPage(
+              child: SettingsPage(),
+            ),
           );
         },
       ),
