@@ -1,0 +1,10 @@
+{
+  "SettingLocale": "Locale",
+  "SettingLocaleLanguage": "Language",
+  "SettingTheme": "Theme",
+  "SettingThemeColor": "Theme Color",
+  "SettingThemeMode": "Dark Mode",
+  "SettingThemeModeDark": "Enabled",
+  "SettingThemeModeLight": "Disabled",
+  "SettingFollowSystem": "Follow System"
+}

@@ -1,0 +1,10 @@
+{
+  "SettingLocale": "区域",
+  "SettingLocaleLanguage": "语言",
+  "SettingTheme": "主题",
+  "SettingThemeColor": "主题颜色",
+  "SettingThemeMode": "夜间模式",
+  "SettingThemeModeDark": "总是启用",
+  "SettingThemeModeLight": "总是关闭",
+  "SettingFollowSystem": "跟随系统"
+}
