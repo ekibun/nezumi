@@ -3,6 +3,9 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  flutter_iconv
+  flutter_qjs
+  flutter_webview
 )
 
 set(PLUGIN_BUNDLED_LIBRARIES)

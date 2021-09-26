@@ -1,0 +1,19 @@
+[submodule "plugins/ffplay"]
+    path = plugins/ffplay
+    url = https://github.com/ekibun/flutter_ffplay.git
+
+[submodule "plugins/torrent"]
+    path = plugins/torrent
+    url = https://github.com/ekibun/torrent.git
+
+[submodule "plugins/quickjs"]
+    path = plugins/quickjs
+    url = https://github.com/ekibun/flutter_qjs.git
+
+[submodule "plugins/iconv"]
+    path = plugins/iconv
+    url = https://github.com/ekibun/flutter_iconv.git
+
+[submodule "plugins/webview"]
+    path = plugins/webview
+    url = https://github.com/ekibun/flutter_webview.git

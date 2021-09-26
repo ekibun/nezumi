@@ -1,9 +1,14 @@
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/widgets.dart';
+import 'package:hive/hive.dart';
+import 'package:nezumi/common/storage.dart';
 
 class Global {
-  static late SharedPreferences _sp;
-  static SharedPreferences get sp => _sp;
+  static late FileStorage _fs;
+  static FileStorage get fs => _fs;
   static init() async {
-    _sp = await SharedPreferences.getInstance();
+    WidgetsFlutterBinding.ensureInitialized();
+    _fs = await FileStorage.getInstance();
+    Hive.init(_fs.root.path);
+    await Hive.openBox('settings');
   }
 }
