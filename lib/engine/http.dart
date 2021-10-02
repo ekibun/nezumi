@@ -18,8 +18,8 @@ class Http {
               validateStatus: (status) => true,
             ),
           );
-          _dio!.interceptors
-              .add(LogInterceptor(requestHeader: false, responseHeader: false));
+          // _dio!.interceptors
+          //     .add(LogInterceptor(requestHeader: false, responseHeader: false));
         }
         return _dio!;
       })();
@@ -61,17 +61,26 @@ class Http {
     return body;
   }
 
-  static Future<dynamic> fetch(Map req) async {
+  static Future<Response<T>> request<T>(
+    Map req, {
+    CancelToken? cancelToken,
+    ResponseType responseType = ResponseType.bytes,
+  }) {
     var reqBody = _wrapBody(req["body"]);
-    Response rsp = await (dio.request(
+    return dio.request(
       req["url"],
       data: reqBody,
+      cancelToken: cancelToken,
       options: Options(
           method: req["method"],
           headers: Map.from(req["headers"]),
-          responseType: ResponseType.bytes,
+          responseType: responseType,
           followRedirects: req["redirect"] == "follow"),
-    ));
+    );
+  }
+
+  static Future<dynamic> fetch(Map req) async {
+    Response rsp = await request(req);
     return {
       "url": rsp.isRedirect == true ? rsp.realUri.toString() : req["url"],
       "headers": rsp.headers.map,

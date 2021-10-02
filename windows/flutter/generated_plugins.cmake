@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  flutter_ffplay
   flutter_iconv
   flutter_qjs
   flutter_webview

@@ -17,10 +17,12 @@ class Engine {
 
   static Future<String> Function(String) _moduleHandler = (module) async {
     if (module.startsWith("@source/")) {
-      final data = await Global.fs.getObject("script/" +
-          module.replaceAll(new RegExp(r"^@source/|.js$"), "") +
-          ".js");
-      return utf8.decode(data!);
+      final data = await Global.fs
+          .getContext("script/" +
+              module.replaceAll(new RegExp(r"^@source/|.js$"), "") +
+              ".js")
+          .readAll();
+      return utf8.decode(data);
     }
     var modulePath = module == "@init"
         ? "js/init.js"
@@ -47,7 +49,7 @@ class Engine {
         print(args[1]);
         return;
       default:
-        throw Exception("No such method");
+        throw UnimplementedError();
     }
   }
 

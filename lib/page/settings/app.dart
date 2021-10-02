@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:nezumi/generated/l10n.dart';
-import 'package:nezumi/store/settings.dart';
+import 'package:nezumi/common/storage.dart';
 
 class AppSettings extends Settings {
-  @override
-  String get boxName => 'settings';
-
   @override
   Map<String, dynamic> get settings => {
         'theme': (S s) => s.SettingTheme,
@@ -39,9 +36,7 @@ class AppSettings extends Settings {
         },
       };
 
-  AppSettings._();
+  AppSettings._() : super("settings.json");
   static AppSettings? _inst;
-  static Widget watch(
-          Widget Function(BuildContext context, Settings settings) builder) =>
-      (_inst ??= AppSettings._()).watchImpl(builder);
+  factory AppSettings() => _inst ??= AppSettings._();
 }

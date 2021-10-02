@@ -1,23 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:nezumi/generated/l10n.dart';
-import 'package:nezumi/store/app.dart';
-import 'package:nezumi/store/settings.dart';
+import 'package:nezumi/page/settings/app.dart';
+import 'package:nezumi/common/storage.dart';
+import 'package:provider/provider.dart';
 
 class SettingsFragment extends StatelessWidget {
-  final EdgeInsets? padding;
-
-  const SettingsFragment({Key? key, this.padding}) : super(key: key);
-
   @override
   Widget build(BuildContext context) {
-    return AppSettings.watch((context, settings) => ListView(
-          clipBehavior: Clip.none,
-          padding: padding,
-          children: List<Widget>.from(
-            settings.settings.entries
-                .map((v) => _buildSettingsItem(context, v, settings)),
-          ),
-        ));
+    return Consumer<AppSettings>(
+        builder: (context, settings, _) => ListView(
+              clipBehavior: Clip.none,
+              padding: EdgeInsets.fromLTRB(0, 54, 0, 0),
+              children: List<Widget>.from(
+                settings.settings.entries
+                    .map((v) => _buildSettingsItem(context, v, settings)),
+              ),
+            ));
   }
 
   Widget _buildSettingsItem(

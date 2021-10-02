@@ -171,10 +171,6 @@ async (_dart, _webview) => {
         remove: 0,
       }
     }),
-    Xpath: (html) => {
-      const xpathObject = _dart("xpath", [html]);
-      return (xpath) => _dart("xpath_query", [xpathObject, xpath]);
-    },
     console: {
       log: (...args) => {
         _dart("console", ["log", args]);
