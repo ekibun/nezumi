@@ -5,21 +5,10 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "nezumi",
-            "request": "launch",
-            "type": "dart"
-        },
-        {
-            "name": "nezumi (profile mode)",
-            "request": "launch",
+            "name": "Flutter",
             "type": "dart",
-            "flutterMode": "profile"
-        },
-        {
-            "name": "torrent",
-            "cwd": "plugins\\torrent",
             "request": "launch",
-            "type": "dart"
-        }
+            "program": "lib/main.dart"
+        },
     ]
 }

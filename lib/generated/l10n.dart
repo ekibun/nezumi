@@ -50,6 +50,86 @@ class S {
     return Localizations.of<S>(context, S);
   }
 
+  /// `Loading...`
+  String get Loading {
+    return Intl.message(
+      'Loading...',
+      name: 'Loading',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Episodes`
+  String get Episodes {
+    return Intl.message(
+      'Episodes',
+      name: 'Episodes',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Noting`
+  String get ErrorEmpty {
+    return Intl.message(
+      'Noting',
+      name: 'ErrorEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collect`
+  String get Collect {
+    return Intl.message(
+      'Collect',
+      name: 'Collect',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collected`
+  String get Collected {
+    return Intl.message(
+      'Collected',
+      name: 'Collected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Collections`
+  String get Collections {
+    return Intl.message(
+      'Collections',
+      name: 'Collections',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Sort`
+  String get Sort {
+    return Intl.message(
+      'Sort',
+      name: 'Sort',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Settings`
+  String get Settings {
+    return Intl.message(
+      'Settings',
+      name: 'Settings',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Locale`
   String get SettingLocale {
     return Intl.message(

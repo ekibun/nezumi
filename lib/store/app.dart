@@ -1,8 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:nezumi/generated/l10n.dart';
-import 'package:nezumi/common/storage.dart';
+import 'package:nezumi/store/storage.dart';
 
 class AppSettings extends Settings {
+  static getTheme(bool dark) {
+    final MaterialColor themeColor = AppSettings()['themeColor'];
+    if (dark) {
+      return ThemeData(
+          brightness: Brightness.dark,
+          primaryColor: themeColor,
+          canvasColor: Colors.grey[850],
+          hintColor: themeColor,
+          backgroundColor: Colors.transparent,
+          splashColor: themeColor.withAlpha(50),
+          primaryColorBrightness: Brightness.dark);
+    } else {
+      return ThemeData(
+          brightness: Brightness.light,
+          primaryColor: themeColor,
+          canvasColor: Colors.grey[200],
+          hintColor: themeColor,
+          backgroundColor: Colors.transparent,
+          splashColor: themeColor.withAlpha(50),
+          primaryColorBrightness: Brightness.dark);
+    }
+  }
+
   @override
   Map<String, dynamic> get settings => {
         'theme': (S s) => s.SettingTheme,
@@ -36,7 +59,7 @@ class AppSettings extends Settings {
         },
       };
 
-  AppSettings._() : super("settings.json");
+  AppSettings._() : super("settings");
   static AppSettings? _inst;
   factory AppSettings() => _inst ??= AppSettings._();
 }

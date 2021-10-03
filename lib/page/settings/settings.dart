@@ -1,21 +1,36 @@
 import 'package:flutter/material.dart';
 import 'package:nezumi/generated/l10n.dart';
-import 'package:nezumi/page/settings/app.dart';
-import 'package:nezumi/common/storage.dart';
+import 'package:nezumi/page/common/base.dart';
+import 'package:nezumi/store/app.dart';
+import 'package:nezumi/store/storage.dart';
 import 'package:provider/provider.dart';
 
-class SettingsFragment extends StatelessWidget {
+class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Consumer<AppSettings>(
-        builder: (context, settings, _) => ListView(
-              clipBehavior: Clip.none,
-              padding: EdgeInsets.fromLTRB(0, 54, 0, 0),
-              children: List<Widget>.from(
-                settings.settings.entries
-                    .map((v) => _buildSettingsItem(context, v, settings)),
+    return BaseFragment(
+      title: (s) => s.Settings,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 600),
+        child: Padding(
+          padding: EdgeInsets.only(top: 54),
+          child: Material(
+            clipBehavior: Clip.hardEdge,
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            child: Consumer<AppSettings>(
+              builder: (context, settings, _) => ListView(
+                clipBehavior: Clip.none,
+                children: List<Widget>.from(
+                  settings.settings.entries
+                      .map((v) => _buildSettingsItem(context, v, settings)),
+                ),
               ),
-            ));
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildSettingsItem(

@@ -1,4 +1,12 @@
 {
+  "Loading": "Loading...",
+  "Episodes": "Episodes",
+  "ErrorEmpty": "Noting",
+  "Collect": "Collect",
+  "Collected": "Collected",
+  "Collections": "Collections",
+  "Sort": "Sort",
+  "Settings": "Settings",
   "SettingLocale": "Locale",
   "SettingLocaleLanguage": "Language",
   "SettingTheme": "Theme",

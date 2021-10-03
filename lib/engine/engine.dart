@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:flutter_iconv/flutter_iconv.dart';
 import 'package:flutter_qjs/flutter_qjs.dart';
-import 'package:nezumi/common/global.dart';
+import 'package:nezumi/store/global.dart';
 import 'webview.dart';
 import 'http.dart';
 import 'wrapper.dart';
@@ -18,7 +18,7 @@ class Engine {
   static Future<String> Function(String) _moduleHandler = (module) async {
     if (module.startsWith("@source/")) {
       final data = await Global.fs
-          .getContext("script/" +
+          .getContext("source/" +
               module.replaceAll(new RegExp(r"^@source/|.js$"), "") +
               ".js")
           .readAll();

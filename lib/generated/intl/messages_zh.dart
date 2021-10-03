@@ -21,6 +21,12 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+        "Collect": MessageLookupByLibrary.simpleMessage("收藏"),
+        "Collected": MessageLookupByLibrary.simpleMessage("已收藏"),
+        "Collections": MessageLookupByLibrary.simpleMessage("收藏"),
+        "Episodes": MessageLookupByLibrary.simpleMessage("剧集"),
+        "ErrorEmpty": MessageLookupByLibrary.simpleMessage("什么都没有哦"),
+        "Loading": MessageLookupByLibrary.simpleMessage("读取中..."),
         "SettingFollowSystem": MessageLookupByLibrary.simpleMessage("跟随系统"),
         "SettingLocale": MessageLookupByLibrary.simpleMessage("区域"),
         "SettingLocaleLanguage": MessageLookupByLibrary.simpleMessage("语言"),
@@ -28,6 +34,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "SettingThemeColor": MessageLookupByLibrary.simpleMessage("主题颜色"),
         "SettingThemeMode": MessageLookupByLibrary.simpleMessage("夜间模式"),
         "SettingThemeModeDark": MessageLookupByLibrary.simpleMessage("总是启用"),
-        "SettingThemeModeLight": MessageLookupByLibrary.simpleMessage("总是关闭")
+        "SettingThemeModeLight": MessageLookupByLibrary.simpleMessage("总是关闭"),
+        "Settings": MessageLookupByLibrary.simpleMessage("设置"),
+        "Sort": MessageLookupByLibrary.simpleMessage("排序")
       };
 }

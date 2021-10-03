@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:nezumi/generated/l10n.dart';
 import 'package:nezumi/widget/actionbar.dart';
 
-class CenterPage extends StatelessWidget {
+class BaseFragment extends StatelessWidget {
   final Widget? child;
   final List<Widget>? actions;
-  final String? title;
+  final String Function(S)? title;
 
-  const CenterPage({
+  const BaseFragment({
     Key? key,
     this.child,
     this.actions,
@@ -14,15 +15,13 @@ class CenterPage extends StatelessWidget {
   }) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    final s = S.of(context);
     return Material(
       child: Stack(
         alignment: AlignmentDirectional.topCenter,
         children: [
           SafeArea(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 600),
-              child: child,
-            ),
+            child: child ?? SizedBox(),
           ),
           GradientBackground(
             child: ActionBar(
@@ -30,7 +29,7 @@ class CenterPage extends StatelessWidget {
                   [
                     Expanded(
                       child: Text(
-                        title ?? '',
+                        title?.call(s) ?? "",
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.subtitle1,

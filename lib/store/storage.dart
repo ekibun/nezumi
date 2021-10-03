@@ -1,12 +1,14 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
-import 'package:nezumi/common/global.dart';
+import 'package:nezumi/store/download.dart';
+import 'package:nezumi/store/global.dart';
+import 'package:nezumi/store/subject.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:torrent/bencode.dart';
 import 'package:path/path.dart' as p;
 
 class FileContext {
@@ -190,35 +192,41 @@ class FileStorage {
 
 abstract class DataStorage<T> extends ChangeNotifier {
   final FileContext _ctx;
-  late T data;
+  late final T data;
   T get defaultValue;
 
-  T _decode(List<int> bytes) {
-    try {
-      return JsonDecoder().convert(Utf8Decoder().convert(bytes));
-    } catch (e) {
-      return defaultValue;
-    }
-  }
+  static final _extendObject = <BencodeObject>[
+    Subject(),
+    DownloadTask(),
+    DownloadFile(),
+  ];
 
-  List<int> _encode() {
-    return utf8.encode(JsonEncoder.withIndent(" ").convert(data));
-  }
+  static registerDecodeData(int id, List<int> Function(dynamic) data) {}
 
   DataStorage(String path) : _ctx = Global.fs.getContext(path, create: true) {
-    data = _decode(_ctx.readSync());
+    try {
+      data = Bencode.decode(_ctx.readSync(), extend: _extendObject);
+    } catch (e) {
+      data = defaultValue;
+    }
   }
 
   Future<void> close() async => _ctx.close();
 
   Future? _flushTask;
+  int _lastTime = 0;
   void flush() {
     notifyListeners();
     if (_flushTask == null) {
-      _flushTask = Future.delayed(Duration(milliseconds: 1000), () {
-        _flushTask = null;
-        _ctx.writeAll(_encode());
-      });
+      final last = _lastTime;
+      _lastTime = DateTime.now().millisecondsSinceEpoch;
+      _flushTask = Future.delayed(
+        Duration(milliseconds: min(1000, _lastTime - last)),
+        () {
+          _flushTask = null;
+          _ctx.writeAll(Bencode.encode(data));
+        },
+      );
     }
   }
 }

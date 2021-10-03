@@ -22,7 +22,9 @@ class ActionButton extends StatelessWidget {
             child: Icon(
               icon,
               size: 21,
-              color: Theme.of(context).disabledColor,
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white54
+                  : Colors.black54,
             )),
       ),
     );
@@ -72,9 +74,10 @@ class ActionBar extends StatelessWidget {
       child: Material(
         type: MaterialType.transparency,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 16),
+          padding: EdgeInsets.fromLTRB(16, 0, 16, 0),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Row(children: [
+              SizedBox(height: 58),
               showGoBack && Navigator.of(context).canPop()
                   ? ActionButton(
                       icon: Icons.arrow_back,

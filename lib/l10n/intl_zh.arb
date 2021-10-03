@@ -1,4 +1,12 @@
 {
+  "Loading": "读取中...",
+  "Episodes": "剧集",
+  "ErrorEmpty": "什么都没有哦",
+  "Collect": "收藏",
+  "Collected": "已收藏",
+  "Collections": "收藏",
+  "Sort": "排序",
+  "Settings": "设置",
   "SettingLocale": "区域",
   "SettingLocaleLanguage": "语言",
   "SettingTheme": "主题",

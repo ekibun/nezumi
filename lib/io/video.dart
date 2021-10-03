@@ -5,30 +5,30 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_ffplay/flutter_ffplay.dart';
-import 'package:nezumi/common/storage.dart';
+import 'package:nezumi/store/storage.dart';
 import 'package:nezumi/engine/http.dart';
-import 'package:nezumi/common/download.dart';
+import 'package:nezumi/store/download.dart';
 
 class _HttpResponse {
   static const int _initSize = 1024;
   static final _emptyList = Uint8List(0);
-  int _length = 0;
+  int _bufferlength = 0;
   Uint8List _buffer;
 
   void add(List<int> bytes) {
     int byteCount = bytes.length;
     if (byteCount == 0) return;
-    int required = _length + byteCount;
+    int required = _bufferlength + byteCount;
     if (_buffer.length < required) {
       _grow(required);
     }
     assert(_buffer.length >= required);
-    _buffer.setRange(_length, required, bytes);
-    _length = required;
+    _buffer.setRange(_bufferlength, required, bytes);
+    _bufferlength = required;
   }
 
   int takeBytes(Uint8List target) {
-    final byteTaken = min(target.length, _length);
+    final byteTaken = min(target.length, _bufferlength);
     target.setRange(0, byteTaken, _buffer);
     takeOut(byteTaken);
     return byteTaken;
@@ -37,11 +37,11 @@ class _HttpResponse {
   void takeOut(int byteTaken) {
     if (byteTaken <= 0) return;
     _offset += byteTaken;
-    _length -= byteTaken;
-    for (var i = 0; i < _length; ++i) {
+    _bufferlength -= byteTaken;
+    for (var i = 0; i < _bufferlength; ++i) {
       _buffer[i] = _buffer[i + byteTaken];
     }
-    if (_length <= 0) _buffer = _emptyList;
+    if (_bufferlength <= 0) _buffer = _emptyList;
   }
 
   void _grow(int required) {
@@ -73,23 +73,34 @@ class _HttpResponse {
   late StreamSubscription _sub;
   bool get isClosed => _onData.isClosed;
   final HttpIOContext _ctx;
-  late String _fileName;
+  late String fileName;
+  int? length;
 
   _HttpResponse(this._ctx, this._offset, this.rsp, int maxBufferSize)
       : _buffer = _emptyList {
     final disposition = rsp.headers.value("content-disposition");
     final match = RegExp("filename=\"(.*?)\"").firstMatch(disposition ?? "");
     if (match != null)
-      _fileName = match.group(1)!;
+      fileName = match.group(1)!;
     else
-      _fileName = rsp.realUri.toString().split("?")[0].split("/").last;
+      fileName = rsp.realUri.toString().split("?")[0].split("/").last;
+    try {
+      if (rsp.statusCode == 206) {
+        length = int.parse(
+            rsp.headers.value(HttpHeaders.contentRangeHeader)!.split("/").last);
+      } else
+        length = int.parse(rsp.headers.value(HttpHeaders.contentLengthHeader)!);
+    } catch (e) {
+      length = null;
+    }
     _sub = (rsp.data as ResponseBody).stream.listen((data) {
       try {
-        final file = _ctx.__file ??=
-            _ctx._task.openFile(_ctx.url, create: true, name: _fileName);
-        file?.write(_offset + _length, data).then(
+        final f = _ctx._task.task.files
+            .putIfAbsent(_ctx.url, () => DownloadFile(name: fileName));
+        final file = _ctx._file ??= _ctx._task.getFile(f);
+        file?.write(_offset + _bufferlength, data).then(
           (value) {
-            DownloadList().flush();
+            DownloadDB().flush();
           },
         );
       } catch (e) {
@@ -97,7 +108,7 @@ class _HttpResponse {
       }
       add(data);
       _onData.add(null);
-      if (_length > maxBufferSize) _sub.pause();
+      if (_bufferlength > maxBufferSize) _sub.pause();
     }, onDone: () => _onData.close());
   }
 
@@ -108,7 +119,7 @@ class _HttpResponse {
 
 class HttpIOHandler extends IOHandler with FileTask {
   HttpIOHandler(
-    Map task, [
+    DownloadTask task, [
     int bufferSize = 32768,
   ]) : super(bufferSize) {
     this.task = task;
@@ -124,57 +135,51 @@ class HttpIOContext extends IOContext {
   int _offset = 0;
   int _length = 0;
   final FileTask _task;
-  FileContext? __file;
+  FileContext? _file;
   _HttpResponse? __rsp;
 
   Future<_HttpResponse> getRange(int start) async {
     final Map rangeReq = {
       "redirect": "follow",
-      ..._task.task["req"],
+      ...(_task.task.req ?? {}),
       "url": url,
       "headers": {
-        ...(_task.task["req"]["headers"] ?? {}),
+        ...(_task.task.req?["headers"] ?? {}),
         HttpHeaders.rangeHeader: "bytes=$start-",
       }
     };
     final rsp = await Http.request(rangeReq, responseType: ResponseType.stream);
-    final file = _task.get(url, create: true);
-    try {
-      if (rsp.statusCode == 206) {
-        _length = int.parse(
-            rsp.headers.value(HttpHeaders.contentRangeHeader)!.split("/").last);
-      } else
-        _length =
-            int.parse(rsp.headers.value(HttpHeaders.contentLengthHeader)!);
-    } catch (e) {
-      _length = -1;
-    }
-    file?["length"] = _length;
-    DownloadList().flush();
-    return _HttpResponse(
+    final ret = _HttpResponse(
       this,
       rsp.statusCode == 206 ? start : 0,
       rsp,
       128 * 1024,
     );
+    final file = _task.task.files.putIfAbsent(
+      url,
+      () => DownloadFile(name: ret.fileName),
+    );
+    file.length = _length;
+    DownloadDB().flush();
+    return ret;
   }
 
   Future<_HttpResponse> get _rsp async {
     var rsp = __rsp ??= await getRange(_offset);
-    print("[${rsp._offset}+${rsp._length}]$_offset");
-    if (rsp._offset <= _offset && rsp._offset + rsp._length >= _offset) {
+    if (rsp._offset <= _offset && rsp._offset + rsp._bufferlength >= _offset) {
       /*
        * [///|///buffer///////]
        *   offset
        */
       rsp.takeOut(_offset - rsp._offset);
-    } else if (rsp._offset + rsp._length < _offset) {
+    } else if (rsp._offset + rsp._bufferlength < _offset) {
       /*
        * [////buffer////]   |
        *                  offset
        */
       final newRsp = await getRange(_offset);
-      if (newRsp._offset + newRsp._length > rsp._offset + rsp._length) {
+      if (newRsp._offset + newRsp._bufferlength >
+          rsp._offset + rsp._bufferlength) {
         rsp.close();
         rsp = __rsp = newRsp;
       } else {
@@ -183,11 +188,11 @@ class HttpIOContext extends IOContext {
       }
       // consume
       while (true) {
-        if (rsp._offset + rsp._length >= _offset) {
+        if (rsp._offset + rsp._bufferlength >= _offset) {
           rsp.takeOut(_offset - rsp._offset);
           break;
         } else {
-          rsp.takeOut(rsp._length);
+          rsp.takeOut(rsp._bufferlength);
         }
         if (rsp._sub.isPaused) rsp._sub.resume();
         await rsp._onData.stream.first;
@@ -210,11 +215,11 @@ class HttpIOContext extends IOContext {
 
   @override
   Future<int> read(Uint8List buf) async {
-    final fileInfo = _task.get(url);
-    if (fileInfo is Map) {
-      if ((fileInfo["length"] ?? 0) > 0 && _offset >= fileInfo["length"])
+    final fileInfo = _task.task.files[url];
+    if (fileInfo != null) {
+      if ((fileInfo.length ?? 0) > 0 && _offset >= fileInfo.length!)
         return -1; // EOF
-      final file = __file ??= _task.openFile(url);
+      final file = _file ??= _task.getFile(fileInfo);
       if (file != null) {
         final range = await file.read(_offset, buf);
         if (range > 0) {
@@ -246,9 +251,9 @@ class HttpIOContext extends IOContext {
     switch (whence) {
       case AVSEEK_SIZE:
         if (_length != 0) return _length;
-        final file = _task.get(url);
-        if (file is Map && file["length"] != null) {
-          return _length = file["length"];
+        final file = _task.task.files[url];
+        if (file?.length != null) {
+          return _length = file!.length!;
         }
         await _rsp;
         return _length;
@@ -261,7 +266,7 @@ class HttpIOContext extends IOContext {
   @override
   Future<int> close() async {
     await __rsp?.close();
-    await __file?.close();
+    await _file?.close();
     return 0;
   }
 }

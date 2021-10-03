@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:nezumi/common/storage.dart';
+import 'package:nezumi/store/storage.dart';
 
 class Global {
   static late FileStorage _fs;
