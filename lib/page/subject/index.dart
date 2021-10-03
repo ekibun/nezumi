@@ -19,7 +19,6 @@ class SubjectPage extends StatefulWidget {
 
 class _SubjectPage extends State<SubjectPage> {
   Subject? subjectInfo;
-  String? epSite;
   List eps = [];
 
   @override
@@ -28,7 +27,7 @@ class _SubjectPage extends State<SubjectPage> {
     Future.microtask(() {
       subjectInfo = ModalRoute.of(context)?.settings.arguments as Subject;
       setState(() {
-        updateEpisodeList(subjectInfo?.info);
+        updateEpisodeList(subjectInfo?.getSource());
       });
     });
   }
@@ -39,12 +38,12 @@ class _SubjectPage extends State<SubjectPage> {
     if (lastJob?.isCompleted == false) lastJob?.completeError("cancel");
 
     final job = _subjectUpdateJob = Completer();
-    final infoSite = subjectInfo?.info;
-    final infoId = subjectInfo?.sites[subjectInfo?.info ?? ""];
-    if (infoSite == null || infoId == null) return;
-    Engine.getSource(infoSite).then((value) async {
-      final newInfo =
-          await (value["getSubjectInfo"] as JSInvokable).invoke([infoId]);
+    final src = subjectInfo?.getSource();
+    if (src == null) return;
+    Engine.getSource(src.site ?? "").then((value) async {
+      final newInfo = await (value["getSubjectInfo"] as JSInvokable).invoke([
+        src.id,
+      ]);
       if (!job.isCompleted) job.complete(newInfo);
     }).catchError((error) {
       if (job.isCompleted) return;
@@ -67,26 +66,26 @@ class _SubjectPage extends State<SubjectPage> {
   }
 
   Completer? _episodeListJob;
-  updateEpisodeList(String? site) {
+  Source? _lastSrc;
+  updateEpisodeList(Source? src) {
     final lastJob = _episodeListJob;
     if (lastJob?.isCompleted == false) lastJob?.completeError("cancel");
+    if (src == null) return;
 
     final job = _episodeListJob = Completer();
-    final infoId = subjectInfo?.sites[site];
-    if (site == null || infoId == null) return;
-    epSite = site;
+    _lastSrc = src;
     eps.clear();
 
-    Engine.getSource(site).then((value) async {
+    Engine.getSource(src.site ?? "").then((value) async {
       final newInfo =
-          await (value["getEpisodeList"] as JSInvokable).invoke([infoId]);
+          await (value["getEpisodeList"] as JSInvokable).invoke([src.id]);
       if (!job.isCompleted) job.complete(newInfo);
     }).catchError((error) {
       if (job.isCompleted) return;
       job.completeError(error);
     });
     job.future.then((value) {
-      if (epSite != site) return;
+      if (_lastSrc != src) return;
       setState(() {
         eps.addAll(value);
       });
@@ -163,8 +162,6 @@ class _SubjectPage extends State<SubjectPage> {
                     subjectInfo?.name ?? "",
                     style: Theme.of(context).textTheme.subtitle1,
                   ),
-                  SizedBox(height: 6),
-                  Text(subjectInfo?.info ?? ""),
                 ],
               ),
             ),

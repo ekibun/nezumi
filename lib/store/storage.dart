@@ -196,6 +196,7 @@ abstract class DataStorage<T> extends ChangeNotifier {
   T get defaultValue;
 
   static final _extendObject = <BencodeObject>[
+    Source(),
     Subject(),
     DownloadTask(),
     DownloadFile(),
@@ -206,7 +207,8 @@ abstract class DataStorage<T> extends ChangeNotifier {
   DataStorage(String path) : _ctx = Global.fs.getContext(path, create: true) {
     try {
       data = Bencode.decode(_ctx.readSync(), extend: _extendObject);
-    } catch (e) {
+    } catch (e, stack) {
+      print(stack);
       data = defaultValue;
     }
   }

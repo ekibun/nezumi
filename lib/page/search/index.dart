@@ -46,11 +46,15 @@ class _SearchPageState extends State<SearchPage> {
       if (!searchJob.isCompleted)
         searchJob.complete(searchData.map((e) {
           return Subject(
-            name: e["name"],
+            name: e["name"]?.toString(),
             image: e["image"],
-            summary: e["summary"],
-            info: site,
-            sites: {}..[site] = e["id"],
+            summary: e["summary"]?.toString(),
+            src: [
+              Source(
+                site: site,
+                id: e["id"]?.toString(),
+              )
+            ],
           );
         }));
     }).catchError((error, stack) {
